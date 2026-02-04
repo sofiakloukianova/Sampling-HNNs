@@ -12,3 +12,6 @@ class ModelType(StrEnum):
 
     # Sampled Hamiltonian Neural Network (ours)
     S_HNN = "S-HNN"
+
+    # Seperable sampled Hamiltonian Neural Network
+    S_HNN_SEP = "S-HNN-SEP"

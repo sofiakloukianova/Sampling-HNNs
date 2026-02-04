@@ -15,6 +15,8 @@ class TraditionalTrainer(BaseTrainer):
         self.learning_rate = learning_rate
         self.weight_decay = weight_decay
         self.training_device = device
+        self.loss_history = []
+        self.test_error_history = []
 
     def train(self, model, train_inputs, train_dt_truths, train_input_x_0, train_input_x_0_H_truth, device=DeviceType.GPU, dtype=torch.float64, train_H_truths=None):
         super(TraditionalTrainer, self).train(model, train_inputs, train_dt_truths, train_input_x_0, train_input_x_0_H_truth, device, dtype, train_H_truths)
@@ -45,6 +47,8 @@ class TraditionalTrainer(BaseTrainer):
             dt_true = get_batch(train_dt_truths, step, self.batch_size, requires_grad=False, dtype=dtype, device=self.training_device)
             loss = self.__step(step, model, optim, x, dt_true)
             train_losses.append(loss)
+            self.loss_history.append(loss)
+
 
         # followings are for fixing integration constants for HNNs
         if isinstance(model, HNN):

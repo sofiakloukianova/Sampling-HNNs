@@ -5,6 +5,9 @@ from hamiltonian import BaseHamiltonian
 from .grid import generate_uniform_train_test_set
 from .flow_map import flow_map_rk45
 
+from .two_body_orbit_generator import get_dataset
+from .three_body_orbit_generator import get_dataset as get_three_body_dataset
+
 
 def get_batch(x, step, batch_size, requires_grad, dtype, device):
     """
@@ -31,6 +34,75 @@ train_set_type = tuple[ tuple[tuple[ndarray, ndarray | None], ndarray, ndarray, 
 # ( test_inputs, test_dt_truths, test_H_truths, test_H_grad_truths )
 test_set_type = tuple[ ndarray, ndarray, ndarray, ndarray ]
 
+
+def get_two_body_train_test_set(target: BaseHamiltonian, train_size=10000, test_size=2000, rng=None):
+    """
+    Generate or load the two-body problem dataset using orbit_generator.get_dataset().
+    This returns precomputed orbits (coords, dcoords, energy).
+    """
+
+    print("[DataLoader] Loading TwoBody orbit dataset...")
+
+    data = get_dataset(target=target, experiment_name="three_body", save_dir="src/data/three-body-data",
+                                  train_size=train_size, test_size=test_size, rng=rng)
+
+    train_inputs = data["coords"]
+    test_inputs = data["test_coords"]
+    train_dt_truths = data["dcoords"]
+    test_dt_truths = data["test_dcoords"]
+    train_H_truths = data["energy"].reshape(-1, 1)
+    test_H_truths = data["test_energy"].reshape(-1, 1)
+    train_H_grad_truths = target.H_grad(train_inputs)
+    test_H_grad_truths = target.H_grad(test_inputs)
+    train_x_0 = train_inputs[:1]
+    train_x_0_H_truth = train_H_truths[:1]
+
+    train_set = (
+        ((train_inputs, None),
+         train_dt_truths,
+         train_H_truths,
+         train_H_grad_truths),
+        (train_x_0, train_x_0_H_truth)
+    )
+
+    test_set = (test_inputs, test_dt_truths, test_H_truths, test_H_grad_truths)
+    return train_set, test_set
+
+
+def make_noisy_figure8_dataset(target: BaseHamiltonian, train_size=10000, test_size=2000, rng=None):
+    """
+    Generate dataset of noisy figure-8 orbits for training.
+    Each orbit is slightly perturbed around the periodic figure-8.
+    """
+    print("[DataLoader] Loading ThreeBody orbit dataset...")
+    data = get_three_body_dataset(target=target, experiment_name="three_body", save_dir="src/data/three-body-data",
+                                    train_size=train_size, test_size=test_size, rng=rng)
+
+    train_inputs = data["coords"]
+    test_inputs = data["test_coords"]
+    train_dt_truths = data["dcoords"]
+    test_dt_truths = data["test_dcoords"]
+    train_H_truths = data["energy"].reshape(-1, 1)
+    test_H_truths = data["test_energy"].reshape(-1, 1)
+    train_H_grad_truths = target.H_grad(train_inputs)
+    test_H_grad_truths = target.H_grad(test_inputs)
+
+    train_x_0 = train_inputs[:1]
+    train_x_0_H_truth = train_H_truths[:1]
+
+
+    train_set = (
+        ((train_inputs, None),
+         train_dt_truths,
+         train_H_truths,
+         train_H_grad_truths),
+        (train_x_0, train_x_0_H_truth)
+    )
+
+    test_set = (test_inputs, test_dt_truths, test_H_truths, test_H_grad_truths)
+    return train_set, test_set
+
+
 def get_train_test_set(dof, target: BaseHamiltonian, train_size, test_size, q_lims, p_lims, rng=None, use_fd=False, dt_true=1e-4, dt_obs=1e-1) -> tuple[train_set_type, test_set_type]:
     """
     Given degree of freedom, and train and test sizes, sample train and test data
@@ -49,6 +121,13 @@ def get_train_test_set(dof, target: BaseHamiltonian, train_size, test_size, q_li
 
     @return             : train_set, test_set
     """
+    if hasattr(target, "type") and target.type().lower() == "two_body":
+        print("[DataLoader] Detected TwoBody system — loading orbit dataset...")
+        return get_two_body_train_test_set(target, train_size, test_size, rng)
+
+    if hasattr(target, "type") and target.type().lower() == "three_body":
+        print("[DataLoader] Detected ThreeBody system — loading orbit dataset...")
+        return make_noisy_figure8_dataset(target, train_size, test_size, rng)
 
     train_inputs, test_inputs = generate_uniform_train_test_set(
             dof,

@@ -130,8 +130,14 @@ class S_MLP(nn.Module, BaseModel):
 
         d_activation_wrt_x = dense_layer.transform(x) # (K,N_1)
         dense_layer.activation = self.activation.forward
+        # FIRST: compute the pre-activation values z = W @ x + b
+        #z = x @ dense_layer.weights + dense_layer.biases  # (K, N_1)
 
-        return np.einsum('ij,kj->ikj', d_activation_wrt_x, dense_layer.weights) # (K,D,N_1)
+        # THEN: compute activation derivative at those pre-activation values
+        # d_activation_wrt_z = self.activation.grad(z)  # (K, N_1)
+        return np.einsum('ij,kj->ikj', d_activation_wrt_x, dense_layer.weights)  # (K,D,N_1)
+        #return np.einsum('ij,kj->ikj', d_activation_wrt_z, dense_layer.weights) # (K,D,N_1)
+
 
     def __forward_dt(self, x: ndarray) -> ndarray:
         # in plain MLP, output of the model is the time derivatives

@@ -46,9 +46,13 @@ def generate_uniform_train_test_set(dof, train_set_size, train_q_lims, train_p_l
     q_test_grid = np.array(q_test_grid)
     p_test_grid = np.array(p_test_grid)
 
+
     # column stacked (q_i, p_i): (N, 2*dof)
     x_train = np.column_stack([ q.flatten() for q in q_train_grid ] + [ p.flatten() for p in p_train_grid ])
     x_test = np.column_stack([ q.flatten() for q in q_test_grid ] + [ p.flatten() for p in p_test_grid ])
+
+    print("x_train : ", x_train)
+    print("x_test : ", x_test)
 
     assert x_train.ndim == 2
     assert x_train.shape[1] == 2 * dof

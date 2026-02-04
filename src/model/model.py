@@ -7,6 +7,7 @@ from .s_mlp import S_MLP
 # Hamiltonian Neural Networks
 from .hnn import HNN
 from .s_hnn import S_HNN
+from .s_hnn_seperable import S_HNN_SEP
 
 
 class Model():
@@ -29,6 +30,9 @@ class Model():
 
             case ModelType.S_HNN:
                 return S_HNN(input_dim, network_width, activation, random_seed=random_seed, elm_bias_start=kwargs["min_input"], elm_bias_end=kwargs["max_input"], **kwargs)
+
+            case ModelType.S_HNN_SEP:
+                return S_HNN_SEP(input_dim, network_width, activation, random_seed=random_seed, elm_bias_start=kwargs["min_input"], elm_bias_end=kwargs["max_input"], **kwargs)
 
             case _:
                 raise NotImplementedError(f"model type {type} is not implemented yet")
