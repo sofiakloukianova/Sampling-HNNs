@@ -1,29 +1,51 @@
 <div align="center">
   <h1>
-    Training Hamiltonian neural networks without backpropagation
+    Random Feature Hamiltonian Networks for N-Body Problems
   </h1>
 
   <h4>
-    Source code for our <a href="https://arxiv.org/abs/2411.17511">paper</a> on approximating Hamiltonian with sampled neural networks
+    Bachelor's Thesis:
+    <a href="thesis-docs/RF-HNNs-Thesis.pdf">RF-HNNs-Thesis.pdf</a><br>
+    Bachelor's Thesis Presentation:
+    <a href="thesis-docs/RF-HNNs-Presentation.pdf">RF-HNNs-Presentation.pdf</a>
   </h4>
 </div>
+
+---
+
+<details open>
+  <summary>
+    <h2>Original Work</h2>
+  </summary>
+
+  This repository is based on the implementation from:
+  <b>Training Hamiltonian Neural Networks without Backpropagation</b><br>
+  - Repository: <a href="https://github.com/AlphaGergedan/Sampling-HNNs">https://github.com/AlphaGergedan/Sampling-HNNs</a><br>
+  - Paper: <a href="https://arxiv.org/abs/2411.17511">https://arxiv.org/abs/2411.17511</a>
+</details>
+
+---
 
 <details open>
   <summary>
     <h2>Models</h2>
   </summary>
 
-  Available models are:
-  - **MLP**: ODE-Net, directly approximates `q_dot` and `p_dot`. <a href="https://arxiv.org/abs/1806.07366">paper</a>
-  - **HNN**: Hamiltonian neural network approximates `H`, then `q_dot` and `p_dot` are recovered
-  using automatic differentiation and Hamilton's equations. <a href="https://arxiv.org/abs/1906.01563v2">paper</a>
+  The following models are available:
 
-  All the models are available in sampled form. Sampled models have the **S-** prefix, which stands
-  for **Sampled**. In this case, the model's hidden layer parameters are sampled, and the network's
-  last layer is set using the least-squares solution. Different sampling options and resampling
-  using approximate values are available for the SWIM method. <a href="https://arxiv.org/abs/2306.16830">paper</a>
+  - <b>MLP</b>: ODE-Net, directly approximates <code>q_dot</code> and <code>p_dot</code>.
+    <a href="https://arxiv.org/abs/1806.07366">paper</a>
 
-  Here are the sampled ODE-Net (S-MLP) and HNN (S-MLP) models with their architecture illustrations for comparison:
+  - <b>HNN</b>: Hamiltonian neural network approximates <code>H</code>, then recovers
+    <code>q_dot</code> and <code>p_dot</code> using automatic differentiation and Hamilton’s equations.
+    <a href="https://arxiv.org/abs/1906.01563v2">paper</a>
+
+  All models are available in sampled form (<b>S-MLP</b>, <b>S-HNN</b>).
+  In sampled models, hidden-layer parameters are randomly sampled and the final layer is computed
+  using a least-squares solution.  
+  Different sampling strategies are available through the SWIM method.
+  <a href="https://arxiv.org/abs/2306.16830">paper</a>
+
   <div align="center">
     <img src="/assets/smlp-shnn.png" />
   </div>
@@ -31,7 +53,7 @@
 
 ---
 
-<details close>
+<details>
   <summary>
     <h2>Setup</h2>
   </summary>
@@ -69,30 +91,24 @@
   python src/main_limited_data.py --target single_pendulum --model S-HNN
   ```
 
-  For details you can refer to our paper <a href="https://arxiv.org/abs/2411.17511">paper</a>.
+  For details you can refer to the original <a href="https://arxiv.org/abs/2411.17511">paper</a>.
 </details>
 
 ---
 
-<details close>
+<details>
   <summary>
-    <h2>Paper experiments</h2>
+    <h2>This Project</h2>
   </summary>
 
-  - All the experiment results listed in our paper, including all the trained models, are stored under `/experiments` as pickle files and categorized.
-  - In order to reproduce the experiments, refer to the scripts `/src/*experiment.py`.
-  - In order to analyze the results we prepared notebooks located at the root of the project `/analyze-*.ipynb`.
-  - The scripts `/batch*.sh` are used to conduct the experiments listed in our paper in a cluster environment.
-  - The notebook `error_correction_demonstration.ipynb` contains error correction experiments.
-</details>
+  This repository extends the original Sampled-HNN framework to gravitational N-body systems.
 
----
-
-<details open>
-  <summary>
-    <h2>Citation</h2>
-  </summary>
-
-  If you use Sampled-HNNs in your research, please cite our <a href="https://arxiv.org/abs/2411.17511">paper</a>.
-
+  Main additions:
+  - **2-body orbit generation** : `src/data/two_body_orbit_generator.py`
+  - **3-body orbit generation** : `src/data/three_body_orbit_generator.py`
+  - **Hamiltonian formulation of the 2-body system** : `src/hamiltonian/two_body.py`
+  - **Hamiltonian formulation of the 3-body system** : `src/hamiltonian/three_body.py`
+  - **Symplectic integrators** : `src/integrators/`
+  - **Training and evaluation notebooks for 2-body and 3-body systems** : `analyze_two_body.ipynb` & `analyze_three_body.ipynb`
+  - **Generated plots for the thesis**  `plots/`
 </details>
